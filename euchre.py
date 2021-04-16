@@ -289,20 +289,25 @@ def show_table():
     # prints currently on table
     return -1
 
-def player_play_card(hand, lead_suit):
+def player_play_card(hand, l_suit):
     # given player's hand and lead's suit, asks for which card to play, returns card chosen
     print("Your hand: {}".format(hand))
-    # TODO: fix line below, its hardcoded
-    options = get_options(hand=hand, lead_suit='S')
+    options = get_options(hand=hand, lead_suit=l_suit)
     print("Your options: {}".format(options))
     choice = input("pick a card (0 to 4 integer)")
     card_chosen = options[int(choice)]
     return card_chosen
 
-def CPU_play_card():
-    # CPU considers hand, figures out what they can play and plays something
-
-    return -1
+def CPU_play_card(hand, l_suit, t_suit, cards_played):
+    # CPU considers hand, lead suit, trump suit, and list of other cards played so far
+    # figures out what they can play and returns that card
+    print("CPU hand: {}".format(hand))
+    options = get_options(hand=hand, lead_suit=l_suit)
+    print("CPU options: {}".format(options))
+    choice = input("pick a card (0 to 4 integer)")
+    # TODO: fix line below, its hardcoded for the first available option
+    card_chosen = options[0]
+    return card_chosen
 
 def run_trick(h1, h2, h3, h4, t_suit, starting_player):
     # walks through the process, given the starting player (0, 1, 2, 3), hands, t_suit
