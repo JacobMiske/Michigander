@@ -9,6 +9,7 @@ from collections import Counter
 suits = ['H', 'S', 'C', 'D']
 values = ['9', '10', 'J', 'Q', 'K', 'A']
 values_dict = {'9': 1, '10': 2, 'J':3, 'Q':4, 'K':5, 'A':6}
+
 # get each possible card from suits and values used
 def get_deck(suits, values):
     # returns shuffled deck
@@ -142,7 +143,8 @@ def replace_CPU_dealer_card(hand, kat):
     new_hand = hand
     suits = [card[:-1] for card in hand]
     # TODO: dumb logic for now, replace first card in hand, come back later to improve
-
+    lost_card = new_hand[0]
+    new_hand[0] = kat
     return new_hand, lost_card
 
 def play_trick(card1, card2, card3, card4, t_suit, deck):
@@ -186,17 +188,19 @@ def play_trick(card1, card2, card3, card4, t_suit, deck):
     return -1
 
 def CPU_pass_or_pick_up(h, kat):
-    # given a hand and the kat card, returns 0 for pass and 1 for 'pick it up'
+    # given a hand and the kat card, returns 0 for pass and 1 for 'pick it up', 2 for 'picked up and alone'
     kat_suit = kat[-1]
     kat_suit_cards = 0
     for card in h:
         if card[-1] == kat_suit:
             kat_suit_cards += 1
-    # CPU says 'pick it up' if they have 4 or 5 kat suit cards
+    # CPU says 'pick it up' if they have 4 kat suit cards
     if kat_suit_cards > 3:
         return 1
-    else:
-        return 0
+    # CPU says 'pick it up and going alone' if they have 5 kat suit cards
+    if kat_suit_cards > 4:
+        return 2
+    return 0
 
 def CPU_pass_or_declare_trump(h, kat_suit):
     # given a hand, declare trump suit (return eg 'S') or pass 0
@@ -214,32 +218,66 @@ def CPU_pass_or_declare_trump(h, kat_suit):
 def get_kat_decision(h1, h2, h3, h4, d, kat):
     # walks through the start of the round in which the trump suit is determined
     # starts with player left of dealer (d is int)
-    # returns 0 if all passed, 1 is someone demanded it, also returns player who demanded it
-    # also returns t_suit
-    counter = 0
+    # returns 0 if all passed, 1 is someone demanded it, also returns team who demanded it (0 or 1) and the t_suit
+    decision = 0 # player that called it up
+    calling_team = 0 # 0 or 1 for team 1 or team 2
+    kat_suit = kat[-1:]
     hands = [h1, h2, h3, h4]
     if d == 0:
         # dealer is player
         if CPU_pass_or_pick_up(h2, kat=kat):
-            print("player 2 says pick it up")
+            print("player 2 says pick it up to you")
             replace_player_dealer_card(hand=h1, kat=kat)
-            return 1
+            return 1, 1, kat_suit
+        print("player 2 says pass")
         if CPU_pass_or_pick_up(h3, kat=kat):
-            print("player 3 (your partner) says pick it up")
+            print("player 3 (your partner) says pick it up to you")
             replace_player_dealer_card(hand=h1, kat=kat)
-            return 1
+            return 1, 1, kat_suit
+        print("player 3 says pass")
         if CPU_pass_or_pick_up(h4, kat=kat):
-            print("player 4 says pick it up")
+            print("player 4 says pick it up to you")
             replace_player_dealer_card(hand=h1, kat=kat)
-            return 1
+            return 1, 1, kat_suit
+        print("player 4 says pass")
         player_pass_or_pick = input("Back to you dealer: pass on kat or pick it up? (0 to pass, 1 to pick up)")
         if player_pass_or_pick:
             replace_player_dealer_card(hand=h1, kat=kat)
-        return 0
-    if d != 0:
-        # dealer is not player
-        while counter < 3: 
-            player_pass_or_demand = input("What will you say: pass on kat or tell player {} to pick it up? (0 to pass, 1 to tell player {} to pick up)".format(d))
+        return 0, -1, -1
+    if d == 1:
+        # dealer is CPU to left, player 2
+        if CPU_pass_or_pick_up(h3, kat=kat):
+            print("player 3 says pick it up to player 2")
+            replace_player_dealer_card(hand=h2, kat=kat)
+            return 1, 0, kat_suit
+        print("player 3 says pass")
+        if CPU_pass_or_pick_up(h4, kat=kat)
+            print("player 4 says pick it up to player 2")
+            replace_player_dealer_card(hand=h2, kat=kat)
+            return 1, 0, kat_suit
+        print("player 4 says pass")
+        
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        
+        if CPU_pass_or_pick_up(h2, kat=kat)
+            print("player 2 as dealer picks it up")
+
+        print("player 2 as dealer, turns it down... now to determine trump!")
+        
+
+    if d == 2:
+        # dealer is CPU partner across from player
+        CPU3 = CPU_pass_or_pick_up(h4, kat=kat)
+        choice = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        CPU1 = CPU_pass_or_pick_up(h2, kat=kat)
+        CPU2 = CPU_pass_or_pick_up(h3, kat=kat)
+    if d == 3:
+        # dealer is CPU to right
+        choice = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        CPU1 = CPU_pass_or_pick_up(h2, kat=kat)
+        CPU2 = CPU_pass_or_pick_up(h3, kat=kat)
+        CPU3 = CPU_pass_or_pick_up(h4, kat=kat)
+    return 0
 
 def get_trump_suit_declared(h1, h2, h3, h4, d, kat_suit):
     # kat has been rejected, given hands and current dealer, find the trump suit! 
@@ -284,6 +322,42 @@ def get_trump_suit_declared(h1, h2, h3, h4, d, kat_suit):
         # dealer is CPU right of player
         return 1
     return 0
+
+def score_round(t1_score, t2_score, t1_tricks, t2_tricks, calling_team, alone):
+    # given the current scores, the tricks each side took, the calling team, and if alone
+    # returns the two scores
+    team_1_score = t1_score
+    team_2_score = t2_score
+    # calling team is 0 or 1
+    # alone is 0 (False) or 1 (True)
+    if t1_tricks > t2_tricks:
+        # team one won this round
+
+        if calling_team == 1:
+            return team_1_score+2, team_2_score
+        if t1_tricks == 3:
+            return team_1_score+1, team_2_score
+        if t1_tricks == 4:
+            return team_1_score+1, team_2_score
+        if t1_tricks == 5:
+            if alone:
+                return team_1_score+4, team_2_score
+            return team_1_score+2, team_2_score
+    if t2_tricks > t1_tricks:
+        # team two won this round
+
+        if calling_team == 0:
+            return team_1_score, team_2_score+2
+        if t2_tricks == 3:
+            return team_1_score, team_2_score+1
+        if t2_tricks == 4:
+            return team_1_score, team_2_score+1
+        if t2_tricks == 5:
+            if alone:
+                return team_1_score, team_2_score+4
+            return team_1_score, team_2_score+2
+    # if error occured
+    return -1, -1
 
 def show_table():
     # prints currently on table
@@ -339,7 +413,9 @@ hand2 = four_hands[1]
 hand3 = four_hands[2]
 hand4 = four_hands[3]
 
-print(player_play_card(hand1, lead_suit='S'))
+# print(player_play_card(hand1, l_suit='S'))
+
+print(score_round(t1_score=5, t2_score=6, t1_tricks=3, t2_tricks=2, calling_team=1, alone=0))
 
 def play_euchre():
     # main function, progresses game
@@ -349,30 +425,52 @@ def play_euchre():
     team_2_score = 0
     hand_counter = 0
     dealer = 0
+    # play until one team has at least 10 points
     while team_1_score < 10 and team_2_score < 10:
+        # new deck of cards to shuffle
         deck = get_deck(suits=suits, values=values)
+        # initiate blank trump suit for this hand
         trump_suit = ''
+        # deal the hands, kat, three extra
         four_hands, kat, three_left = deal_four_hands(deck=deck)
         kat_suit = kat[-1:]
         print(kat_suit)
-        quit()
         hand1 = four_hands[0]
         hand2 = four_hands[1]
         hand3 = four_hands[2]
         hand4 = four_hands[3]
         print("Your hand: {}".format(hand1))
         print("The top of the kitty: {}".format(kat))
-        kat_picked_up = get_kat_decision(hand1, hand2, hand3, hand4, d=dealer, kat=kat)
+        t_suit = get_kat_decision(hand1, hand2, hand3, hand4, d=dealer, kat=kat)
+        # if kat rejected, go to next phase
         if not kat_picked_up:
-            get_trump_suit_declared(hand1, hand2, hand3, hand4, d=dealer, kat_suit=kat_suit)
+            t_suit = get_trump_suit_declared(hand1, hand2, hand3, hand4, d=dealer, kat_suit=kat_suit)
+        # by this point, the kat was picked up or the trump suit was declared
+        
+        
+        # TODO: fix hardcoded line below
+        t_suit = 'S'
+        # starting player is always to left of dealer
+        starting = dealer+1
+        
+        # init empty list
+        cards_played = []
+        # play 4 cards
+        for i in range(0, 4):
+            CPU_play_card(hand, l_suit, t_suit, cards_played)
 
-        quit()
         # hand is over, change dealer
         dealer += 1
         if dealer == 3:
             # reset dealer to player 1
             dealer = 0
         team_1_score += 1
+    if team_1_score > 10:
+        print("team 1 wins!")
+        return 0
+    if team_2_score > 10:
+        print("team 2 wins!")
+        return 1
     return -1
 
 # play_euchre()
