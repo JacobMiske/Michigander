@@ -124,7 +124,7 @@ def get_options(hand, lead_suit):
             sub_hand.append(card)
     return sub_hand
 
-def replace_player_dealer_card(hand, kat):
+def player_replace_dealer_card(hand, kat):
     # given dealer's hand, the kat, returns the new hand
     print("Your current hand: {}".format(hand))
     print("The kat: {}".format(kat))
@@ -138,7 +138,7 @@ def replace_player_dealer_card(hand, kat):
         return hand
     return -1
 
-def replace_CPU_dealer_card(hand, kat):
+def CPU_replace_dealer_card(hand, kat):
     # given CPU's hand, the kat, returns the new hand and card set away
     new_hand = hand
     suits = [card[:-1] for card in hand]
@@ -218,7 +218,7 @@ def CPU_pass_or_declare_trump(h, kat_suit):
 def get_kat_decision(h1, h2, h3, h4, d, kat):
     # walks through the start of the round in which the trump suit is determined
     # starts with player left of dealer (d is int)
-    # returns 0 if all passed, 1 is someone demanded it, also returns team who demanded it (0 or 1) and the t_suit
+    # returns 0 if all passed, 1 is someone demanded it, also returns team who demanded it (0 or 1) and the kat_suit
     decision = 0 # player that called it up
     calling_team = 0 # 0 or 1 for team 1 or team 2
     kat_suit = kat[-1:]
@@ -227,56 +227,75 @@ def get_kat_decision(h1, h2, h3, h4, d, kat):
         # dealer is player
         if CPU_pass_or_pick_up(h2, kat=kat):
             print("player 2 says pick it up to you")
-            replace_player_dealer_card(hand=h1, kat=kat)
-            return 1, 1, kat_suit
+            player_replace_dealer_card(hand=h1, kat=kat)
+            return 1, 0, kat_suit
         print("player 2 says pass")
         if CPU_pass_or_pick_up(h3, kat=kat):
             print("player 3 (your partner) says pick it up to you")
-            replace_player_dealer_card(hand=h1, kat=kat)
+            player_replace_dealer_card(hand=h1, kat=kat)
             return 1, 1, kat_suit
         print("player 3 says pass")
         if CPU_pass_or_pick_up(h4, kat=kat):
             print("player 4 says pick it up to you")
-            replace_player_dealer_card(hand=h1, kat=kat)
-            return 1, 1, kat_suit
+            player_replace_dealer_card(hand=h1, kat=kat)
+            return 1, 0, kat_suit
         print("player 4 says pass")
         player_pass_or_pick = input("Back to you dealer: pass on kat or pick it up? (0 to pass, 1 to pick up)")
         if player_pass_or_pick:
-            replace_player_dealer_card(hand=h1, kat=kat)
+            player_replace_dealer_card(hand=h1, kat=kat)
+        print("You turned it down, now to determine trump...")
         return 0, -1, -1
     if d == 1:
         # dealer is CPU to left, player 2
         if CPU_pass_or_pick_up(h3, kat=kat):
             print("player 3 says pick it up to player 2")
-            replace_player_dealer_card(hand=h2, kat=kat)
+            player_dealer_card(hand=h2, kat=kat)
             return 1, 0, kat_suit
         print("player 3 says pass")
         if CPU_pass_or_pick_up(h4, kat=kat)
             print("player 4 says pick it up to player 2")
-            replace_player_dealer_card(hand=h2, kat=kat)
+            player_replace_dealer_card(hand=h2, kat=kat)
             return 1, 0, kat_suit
         print("player 4 says pass")
         
         player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
-        
+        if player_pass_or_pick:
+            CPU_replace_dealer_card(h2, kat=kat)
+            return 1, 0, kat_suit
         if CPU_pass_or_pick_up(h2, kat=kat)
             print("player 2 as dealer picks it up")
-
+            return 1, 0, kat_suit
+        return 0, 0, kat_suit
         print("player 2 as dealer, turns it down... now to determine trump!")
         
 
     if d == 2:
         # dealer is CPU partner across from player
-        CPU3 = CPU_pass_or_pick_up(h4, kat=kat)
-        choice = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
-        CPU1 = CPU_pass_or_pick_up(h2, kat=kat)
-        CPU2 = CPU_pass_or_pick_up(h3, kat=kat)
+        if CPU_pass_or_pick_up(h4, kat=kat)
+            print("player 4 says pick it up to player 3")
+            return 1, 0, kat_suit
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        if CPU_pass_or_pick_up(h2, kat=kat)
+            print("player 2 says pick it up to player 3")
+            return 1, 0, kat_suit
+        if CPU_pass_or_pick_up(h3, kat=kat)
+            print("player 3 as dealer picks it up")
+            return 1, 0, kat_suit
+        print("player 3 as dealer, turns it down... now to determine trump!")
     if d == 3:
         # dealer is CPU to right
-        choice = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
-        CPU1 = CPU_pass_or_pick_up(h2, kat=kat)
-        CPU2 = CPU_pass_or_pick_up(h3, kat=kat)
-        CPU3 = CPU_pass_or_pick_up(h4, kat=kat)
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        if CPU_pass_or_pick_up(h2, kat=kat)
+            print("player 2 says pick it up to player 4")
+            return 1, 0, kat_suit
+        if CPU_pass_or_pick_up(h3, kat=kat)
+            print("player 3 says pick it up to player 4")
+            return 1, 0, kat_suit
+        if CPU_pass_or_pick_up(h4, kat=kat)
+            print("player 4 as dealer picks it up")
+            return 1, 0, kat_suit
+        print("player 4 as dealer, turns it down... now to determine trump!")
+        
     return 0
 
 def get_trump_suit_declared(h1, h2, h3, h4, d, kat_suit):
