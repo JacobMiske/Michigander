@@ -180,7 +180,7 @@ def play_trick(card1, card2, card3, card4, t_suit, deck):
                 winning_card_value = card4[:-1]
         index_winner = cards.index(winning_card)
         print("winning card player: {}".format(index_winner+1))
-        return -1
+        return index_winner+1
     else:
         # trump suit is involved in trick
         index_winner = hierachies.index(max(hierachies))
@@ -408,30 +408,82 @@ def CPU_play_card(hand, l_suit, t_suit, cards_played):
     # CPU considers hand, lead suit, trump suit, and list of other cards played so far
     # figures out what they can play and returns that card
     print("CPU hand: {}".format(hand))
-    options = get_options(hand=hand, lead_suit=l_suit)
+    # if first to play in a trick, YOU CAN PLAY WHATEVER YOU WANT
+    if l_suit == None:
+        options = hand
+    else:
+        options = get_options(hand=hand, lead_suit=l_suit)
     print("CPU options: {}".format(options))
-    choice = input("pick a card (0 to 4 integer)")
-    # TODO: fix line below, its hardcoded for the first available option
+    # TODO: fix line below, its hardcoded for the first available option, need some intelligence here...
     card_chosen = options[0]
     return card_chosen
 
-def run_trick(h1, h2, h3, h4, t_suit, starting_player):
-    # walks through the process, given the starting player (0, 1, 2, 3), hands, t_suit
-    # returns winning player (0, 1, 2, 3)
+def play_round(h1, h2, h3, h4, t_suit, starting_player):
+    # walks through the process, given the starting hands (0, 1, 2, 3), t_suit, and starting player
+    # returns winning team and number of tricks each team took
+    t1_tricks = 0
+    t2_tricks = 0
+    winning_team = None
     print("player {} starts".format(starting_player + 1))
-    if starting_player == 0:
-        # player starts
-        print("Player 1 goes first")
+    lead_player = starting_player
+    played_cards = []
+    lead_card = None
+    lead_suit = None
+    for card in range(0, 5):
+        if lead_player == 0:
+            # player starts
+            print("Player 1 goes first")
+            card1 = player_play_card(hand=h1, l_suit=None)
+            played_cards.append(card1)
+            lead_suit = card1[-1:]
+            # other players 
+            card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card2)
+            card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card3)
+            card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card4)
+        if lead_player == 1:
+            # CPU to left starts
+            card2 = CPU_play_card(hand=h2, l_suit=None, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card2)
+            lead_suit = card2[-1:]
+            # other players 
+            card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card3)
+            card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card4)
+            card1 = player_play_card(hand=h1, l_suit=lead_suit)
+            played_cards.append(card1)
+        if lead_player == 2:
+            # CPU partner across starts
+            card3 = CPU_play_card(hand=h3, l_suit=None, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card3)
+            lead_suit = card3[-1:]
+            # other players 
+            card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card4)
+            card1 = player_play_card(hand=h1, l_suit=lead_suit)
+            played_cards.append(card1)
+            card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card2)
+        if lead_player == 3:
+            # CPU to right starts
+            card4 = CPU_play_card(hand=h4, l_suit=None, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card4)
+            lead_suit = card4[-1:]
+            # other players 
+            card1 = player_play_card(hand=h1, l_suit=lead_suit)
+            played_cards.append(card1)
+            card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card2)
+            card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
+            played_cards.append(card3)
+        winning_card = play_trick(card1, card2, card3, card4, t_suit=t_suit, deck=deck)
+        # lead for next trick should be the winner of this trick
+        lead_player = winning_card - 1
 
-    if starting_player == 1:
-        # CPU to left starts
-        return -1
-    if starting_player == 2:
-        # CPU partner across starts
-        return -1
-    if starting_player == 3:
-        return -1
-    return -1
+    return winning_team, t1_tricks, t2_tricks
 
 
 # testing and main
@@ -466,7 +518,6 @@ def play_euchre():
         # deal the hands, kat, three extra
         four_hands, kat, three_left = deal_four_hands(deck=deck)
         kat_suit = kat[-1:]
-        print(kat_suit)
         hand1 = four_hands[0]
         hand2 = four_hands[1]
         hand3 = four_hands[2]
@@ -486,12 +537,8 @@ def play_euchre():
 
         # starting player is always to left of dealer
         starting = dealer+1
-
-        # init empty list
-        cards_played = []
-        # play 4 cards
-        for i in range(0, 4):
-            CPU_play_card(four_hands[], l_suit, t_suit, cards_played)
+        # play the round
+        play_round(h1=hand1, h2=hand2, h3=hand3, h4=hand4, t_suit=t_suit, starting_player=starting)
 
         # t1, t2 = score_round()
         # hand is over, change dealer
