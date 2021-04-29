@@ -123,21 +123,25 @@ def get_options(hand, lead_suit, t_suit):
             sub_hand.append(card)
         # if hand has a jack, see if it's suit is left bower suit, if so, it's t_suit
         if t_suit == 'D':
-            if card == 'JH':
-                has_lead_suit = True
-                sub_hand.append(card)
+            if lead_suit == t_suit:
+                if card == 'JH':
+                    has_lead_suit = True
+                    sub_hand.append(card)
         if t_suit == 'H':
-            if card == 'JD':
-                has_lead_suit = True
-                sub_hand.append(card)
+            if lead_suit == t_suit:
+                if card == 'JD':
+                    has_lead_suit = True
+                    sub_hand.append(card)
         if t_suit == 'C':
-            if card == 'JS':
-                has_lead_suit = True
-                sub_hand.append(card)
+            if lead_suit == t_suit:
+                if card == 'JS':
+                    has_lead_suit = True
+                    sub_hand.append(card)
         if t_suit == 'S':
-            if card == 'JC':
-                has_lead_suit = True
-                sub_hand.append(card)
+            if lead_suit == t_suit:
+                if card == 'JC':
+                    has_lead_suit = True
+                    sub_hand.append(card)
     if not has_lead_suit:
         for card in hand:
             sub_hand.append(card)
@@ -145,10 +149,10 @@ def get_options(hand, lead_suit, t_suit):
 
 def player_replace_dealer_card(hand, kat):
     # given dealer's hand, the kat, returns the new hand
-    print("Your current hand: {}".format(hand))
+    # print("Your current hand: {}".format(hand))
     print("The kat: {}".format(kat))
     while True:
-        card_to_swap = input("Which card do you want to replace with kat? (write it out: eg 'KS')")
+        card_to_swap = input("Which card do you want to replace with kat? (write it out: eg 'KS'): ")
         try:
             hand.remove(card_to_swap)
             hand.append(kat)
@@ -174,6 +178,7 @@ def play_trick(card1, card2, card3, card4, t_suit, deck):
     # first use hierarchy to find winner, if all zeros (no trump) then base of lead_suit
     hier = get_hierarchy(t_suit=t_suit, deck=deck)
     hierachies = []
+    print(cards)
     for card in cards:
         hierachies.append(hier[card])
     print(hierachies)
@@ -259,7 +264,7 @@ def get_kat_decision(h1, h2, h3, h4, d, kat):
             new_hand = player_replace_dealer_card(hand=h1, kat=kat)
             return 1, 0, kat_suit, new_hand
         print("player 4 says pass")
-        player_pass_or_pick = input("Back to you dealer: pass on kat or pick it up? (0 to pass, 1 to pick up)")
+        player_pass_or_pick = input("Back to you dealer: pass on kat or pick it up? (0 to pass, 1 to pick up): ")
         print("Your hand: {}".format(h1))
         if player_pass_or_pick == "1":
             new_hand = player_replace_dealer_card(hand=h1, kat=kat)
@@ -279,7 +284,7 @@ def get_kat_decision(h1, h2, h3, h4, d, kat):
             return 1, 0, kat_suit, new_hand
         print("player 4 says pass")
         
-        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up): ")
         if player_pass_or_pick:
             new_hand, lost_card = CPU_replace_dealer_card(hand=h2, kat=kat)
             return 1, 0, kat_suit, new_hand
@@ -297,7 +302,7 @@ def get_kat_decision(h1, h2, h3, h4, d, kat):
             print("player 4 says pick it up to player 3")
             new_hand, lost_card = CPU_replace_dealer_card(hand=h3, kat=kat)
             return 1, 0, kat_suit, new_hand
-        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up): ")
         if CPU_pass_or_pick_up(h2, kat=kat):
             print("player 2 says pick it up to player 3")
             new_hand, lost_card = CPU_replace_dealer_card(hand=h3, kat=kat)
@@ -309,7 +314,7 @@ def get_kat_decision(h1, h2, h3, h4, d, kat):
         print("player 3 as dealer, turns it down... now to determine trump!")
     if d == 3:
         # dealer is CPU to right
-        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up)")
+        player_pass_or_pick = input("To you player: pass on kat or demand it up? (0 to pass, 1 to demand up): ")
         if CPU_pass_or_pick_up(h2, kat=kat):
             print("player 2 says pick it up to player 4")
             new_hand, lost_card = CPU_replace_dealer_card(hand=h4, kat=kat)
@@ -346,7 +351,7 @@ def get_trump_suit_declared(h1, h2, h3, h4, d, kat, kat_suit):
             print("player 4 declares {}".format(player_4_decision))
             return player_4_decision
         print("player 4 passes")
-        forced_dealer = input("Back to you dealer: you have to declare a suit! (S, D, H, C)")
+        forced_dealer = input("Back to you dealer: you have to declare a suit! (S, D, H, C): ")
         return forced_dealer
     if d == 1:
         # dealer is CPU left of player
@@ -362,7 +367,7 @@ def get_trump_suit_declared(h1, h2, h3, h4, d, kat, kat_suit):
             return 1
         print("player 4 passes")
 
-        player_pass_or_pick = input("On to you dealer, want to call it? (0 for pass; S, D, H, C to declare trump ")
+        player_pass_or_pick = input("On to you dealer, want to call it? (0 for pass; S, D, H, C to declare trump): ")
         if player_pass_or_pick:
             return 0
 
@@ -425,7 +430,7 @@ def player_play_card(hand, l_suit, t_suit):
     print("Your hand: {}".format(hand))
     options = get_options(hand=hand, lead_suit=l_suit, t_suit=t_suit)
     print("Your options: {}".format(options))
-    choice = input("pick a card (0 to 4 integer)")
+    choice = input("pick a card (0 to {} integer): ".format(len(options) - 1))
     card_chosen = options[int(choice)]
     return card_chosen
 
@@ -451,7 +456,7 @@ def play_round(h1, h2, h3, h4, t_suit, starting_player, deck):
     winning_team = None
     print("player {} starts".format(starting_player + 1))
     lead_player = starting_player
-    played_cards = []
+    played_cards = {}
     lead_card = None
     lead_suit = None
     for card in range(0, 5):
@@ -459,81 +464,81 @@ def play_round(h1, h2, h3, h4, t_suit, starting_player, deck):
             # player starts
             print("Player 1 goes first")
             card1 = player_play_card(hand=h1, l_suit=None, t_suit=t_suit)
-            played_cards.append(card1)
+            played_cards[1] = card1
             h1.remove(card1)
-            print("Player 1 plays {}".format(card1))
+            print("Player 1 plays {} \n".format(card1))
             lead_suit = card1[-1:]
             # other players 
             card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card2)
+            played_card[2] = card2
             h2.remove(card2)
-            print("Player 2 plays {}".format(card2))
+            print("Player 2 plays {} \n".format(card2))
             card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card3)
+            played_cards[3] = card3
             h3.remove(card3)
-            print("Player 3 plays {}".format(card3))
+            print("Player 3 plays {} \n".format(card3))
             card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card4)
+            played_cards[4] = card4
             h4.remove(card4)
-            print("Player 4 plays {}".format(card4))
+            print("Player 4 plays {} \n".format(card4))
         if lead_player == 1:
             # CPU to left starts
             card2 = CPU_play_card(hand=h2, l_suit=None, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card2)
+            played_cards[2] = card2
             h2.remove(card2)
-            print("Player 2 plays {}".format(card2))
+            print("Player 2 plays {} \n".format(card2))
             lead_suit = card2[-1:]
             # other players 
             card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card3)
+            played_cards[3] = card3
             h3.remove(card3)
-            print("Player 3 plays {}".format(card3))
+            print("Player 3 plays {} \n".format(card3))
             card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card4)
+            played_cards[4] = card4
             h4.remove(card4)
-            print("Player 4 plays {}".format(card4))
+            print("Player 4 plays {} \n".format(card4))
             card1 = player_play_card(hand=h1, l_suit=lead_suit, t_suit=t_suit)
-            played_cards.append(card1)
+            played_cards[1] = card1
             h1.remove(card1)
-            print("Player 1 plays {}".format(card1))
+            print("Player 1 plays {} \n".format(card1))
         if lead_player == 2:
             # CPU partner across starts
             card3 = CPU_play_card(hand=h3, l_suit=None, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card3)
+            played_cards[3] = card3
             h3.remove(card3)
             print("Player 3 plays {}".format(card3))
             lead_suit = card3[-1:]
             # other players 
             card4 = CPU_play_card(hand=h4, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card4)
+            played_cards[4] = card4
             h4.remove(card4)
             print("Player 4 plays {}".format(card4))
             card1 = player_play_card(hand=h1, l_suit=lead_suit, t_suit=t_suit)
-            played_cards.append(card1)
+            played_cards[1] = card1
             h1.remove(card1)
             print("Player 1 plays {}".format(card1))
             card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card2)
+            played_cards[2] = card2
             h2.remove(card2)
             print("Player 2 plays {}".format(card2))
         if lead_player == 3:
             # CPU to right starts
             card4 = CPU_play_card(hand=h4, l_suit=None, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card4)
+            played_cards[4] = card4
             h4.remove(card4)
             print("Player 4 plays {}".format(card4))
             lead_suit = card4[-1:]
             # other players 
             card1 = player_play_card(hand=h1, l_suit=lead_suit, t_suit=t_suit)
-            played_cards.append(card1)
+            played_cards[1] = card1
             h1.remove(card1)
             print("Player 1 plays {}".format(card1))
             card2 = CPU_play_card(hand=h2, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card2)
+            played_cards[2] = card2
             h2.remove(card2)
             print("Player 2 plays {}".format(card2))
             card3 = CPU_play_card(hand=h3, l_suit=lead_suit, t_suit=t_suit, cards_played=played_cards)
-            played_cards.append(card3)
+            played_cards[3] = card3
             h3.remove(card3)
             print("Player 3 plays {}".format(card3))
         print("Cards played: {}".format(played_cards))
@@ -574,7 +579,7 @@ def play_round(h1, h2, h3, h4, t_suit, starting_player, deck):
 def play_euchre():
     # main function, progresses game
     A = input("Welcome")
-    B = input("press any key to deal out the hands (you start as dealer)")
+    B = input("press any key to deal out the hands (you start as dealer)... ")
     team_1_score = 0
     team_2_score = 0
     hand_counter = 0
@@ -611,7 +616,7 @@ def play_euchre():
         deck = get_deck(suits=suits, values=values)
         win_team, t1_ts, t2_ts = play_round(h1=hand1, h2=hand2, h3=hand3, h4=hand4, t_suit=t_suit, starting_player=starting, deck=deck)
 
-        team_1_score, team_2_score = score_round(t1_score=team_1_score, t2_score=team_2_score, t1_tricks=t1_ts, t2_tricks=t2_ts, calling_team=, alone=0)
+        team_1_score, team_2_score = score_round(t1_score=team_1_score, t2_score=team_2_score, t1_tricks=t1_ts, t2_tricks=t2_ts, calling_team=_, alone=0)
         # hand is over, change dealer
         dealer += 1
         # reset dealer to player 1 if player 4 just went as dealer
