@@ -3,6 +3,7 @@
 import random
 from itertools import permutations
 from collections import Counter
+from terminal_playing_cards import Deck, View
 
 # TODO: Organize! This code needs more structure, break down into separate files and put objects together into unique classes later on
 
@@ -10,6 +11,11 @@ from collections import Counter
 suits = ['H', 'S', 'C', 'D']
 values = ['9', '10', 'J', 'Q', 'K', 'A']
 values_dict = {'9': 1, '10': 2, 'J':3, 'Q':4, 'K':5, 'A':6}
+card_dict = {'AC': 0, 'AD': 1, 'AS': 2, 'AH': 3, '2C': 4, '2D': 5, '2S': 6, '2H': 7, '3C': 8, '3D': 9, '3S': 10, '3H': 11,
+            '4C': 12, '4D': 13, '4S': 14, '4H': 15, '5C': 16, '5D': 17, '5S': 18, '5H': 19, '6C': 20, '6D': 21, '6S': 22, '6H': 23,
+            '7C': 24, '7D': 25, '7S': 26, '7H': 27, '8C': 28, '8D': 29, '8S': 30, '8H': 31, '9C': 32, '9D': 33, '9S': 34, '9H': 35,
+            '10C': 36, '10D': 37, '10S': 38, '10H': 39, 'JC': 40, 'JD': 41, 'JS': 42, 'JH': 43, 'QC': 44, 'QD': 45, 'QS': 46, 'QH': 47,
+            'KC': 48, 'KD': 49, 'KS': 50, 'KH': 51}
 
 # get each possible card from suits and values used
 def get_deck(suits, values):
@@ -57,6 +63,18 @@ def get_cards_not_from_suit(suit, deck):
         if i_suit != suit:
             not_suit_cards.append(i)
     return not_suit_cards
+
+def print_hand(hand):
+    # Using terminal-playing-cards library, print hand to terminal
+    deck = Deck()
+    card_values = [card_dict[i] for i in hand]
+    card_images = View([deck.__getitem__(i) for i in card_values])
+    print(card_images)
+    return -1
+
+def print_table():
+    # prints currently on table
+    return -1
 
 def get_hierarchy(t_suit, deck):
     # returns dict of hierachy key is card, value is int representing hierarchy (1 is best), given the trump suit and deck
@@ -421,10 +439,6 @@ def score_round(t1_score, t2_score, t1_tricks, t2_tricks, calling_team, alone):
     # if error occured
     return -1, -1
 
-def show_table():
-    # prints currently on table
-    return -1
-
 def player_play_card(hand, l_suit, t_suit):
     # given player's hand and lead's suit, asks for which card to play, returns card chosen
     print("Your hand: {}".format(hand))
@@ -560,21 +574,7 @@ def play_round(h1, h2, h3, h4, t_suit, starting_player, deck):
         winning_team = 1
     return winning_team, t1_tricks, t2_tricks
 
-
-# testing and main
-
-# deck = get_deck(suits=suits, values=values)
-# a_deck = get_deck(suits=suits, values=values)
-# four_hands, kat, rest = deal_four_hands(deck=a_deck)
-
-# hand1 = four_hands[0] 
-# hand2 = four_hands[1]
-# hand3 = four_hands[2]
-# hand4 = four_hands[3]
-
-# print(player_play_card(hand1, l_suit='S'))
-
-# print(score_round(t1_score=5, t2_score=6, t1_tricks=3, t2_tricks=2, calling_team=1, alone=0))
+# main
 
 def play_euchre():
     # main function, progresses game
@@ -584,6 +584,9 @@ def play_euchre():
     team_2_score = 0
     hand_counter = 0
     dealer = 0
+
+    # Init deck for terminal viewed cards
+    deck = Deck()
     # play until one team has at least 10 points
     while team_1_score < 10 and team_2_score < 10:
         # new deck of cards to shuffle
@@ -598,6 +601,7 @@ def play_euchre():
         hand3 = four_hands[2]
         hand4 = four_hands[3]
         print("Your hand: {}".format(hand1))
+        print_hand(hand1)
         print("The top of the kitty: {}".format(kat))
         picked_up, team_declared, t_suit, new_hand = get_kat_decision(hand1, hand2, hand3, hand4, d=dealer, kat=kat)
         # print("picked up: {}".format(str(picked_up)))
