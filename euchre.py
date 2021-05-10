@@ -234,9 +234,11 @@ def play_trick(cards_played, t_suit, l_suit, deck):
     else:
         # trump suit is involved in trick
         index_winner = hierachies.index(max(hierachies))
+        print("index winner: {}".format(index_winner))
         players = list(cards_played.keys())
-        winner = players.index(index_winner)
-        print("winning player: {}".format(winner))
+        print("players: {}".format(players))
+        winner = players[index_winner]
+        print("Winning player: {}".format(winner))
         return winner
     return -1
 
@@ -655,7 +657,6 @@ def play_round(h1, h2, h3, h4, t_suit, starting_player, deck):
         print("Cards played: {}".format(played_cards))
         print(played_cards)
         winning_player = play_trick(cards_played=played_cards, t_suit=t_suit, l_suit=lead_suit, deck=deck)
-        print("Winning player: {}".format(winning_player))
 
         if winning_player == 1:
             t1_tricks += 1
@@ -722,6 +723,10 @@ def play_euchre():
         # reset dealer to player 1 if player 4 just went as dealer
         if dealer == 3:
             dealer = 0
+
+        print("TEAM 1 SCORE: {}".format(team_1_score))
+        print("TEAM 2 SCORE: {}".format(team_2_score))
+
     # win condition
     if team_1_score > 10:
         print("team 1 wins!")
